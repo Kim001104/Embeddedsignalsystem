@@ -58,13 +58,15 @@ function setup() {
   modeDisplay.style("color", "#333");
   modeDisplay.size(200);
 
+  
+
   // 빨강 신호 길이 슬라이더
   redSlider = createSlider(500, 5000, redTime, 10);
   redSlider.position(10, 130);
   redSlider.size(500);
   redSlider.input(updateRedLabel);
   redLabel = createP("Red Time: " + redTime + " ms");
-  redLabel.position(10, 150);
+  redLabel.position(windowWidth/2 - 300, 100);
 
   // 노랑 신호 길이 슬라이더
   yellowSlider = createSlider(500, 5000, yellowTime, 10);
@@ -72,7 +74,7 @@ function setup() {
   yellowSlider.size(500);
   yellowSlider.input(updateYellowLabel);
   yellowLabel = createP("Yellow Time: " + yellowTime + " ms");
-  yellowLabel.position(10, 200);
+  yellowLabel.position(windowWidth/2 - 300, 150);
 
   // 초록 신호 길이 슬라이더
   greenSlider = createSlider(500, 5000, greenTime, 10);
@@ -80,7 +82,7 @@ function setup() {
   greenSlider.size(500);
   greenSlider.input(updateGreenLabel);
   greenLabel = createP("Green Time: " + greenTime + " ms");
-  greenLabel.position(10, 250);
+  greenLabel.position(windowWidth/2 - 300, 200);
 }
 
 let lastTask = "None"; // 마지막 Task 값 저장 (중복 업데이트 방지)
