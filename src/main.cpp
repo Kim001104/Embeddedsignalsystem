@@ -15,6 +15,8 @@ const int POTENTIOMETER_PIN = A0; // 조도 조절용 가변 저항
 volatile bool emergencyMode = false;  // 긴급 모드 활성화 여부
 volatile bool cautionMode = false;    // 주의 모드 활성화 여부
 volatile bool blinkMode = false;      // 깜빡임 모드 활성화 여부
+// 🔹 새로운 변수 추가
+volatile bool globalBlinkMode = false;  // 🔹 인터럽트 버튼(스위치 3)으로 모든 LED 깜빡임
 
 unsigned long blinkStartTime = 0;
 int blinkCount = 0;
@@ -65,13 +67,34 @@ void cautionISR() {
     if (!cautionMode) startTrafficCycle();
 }
 
-// 깜빡임 모드 ISR
+// 🔹 인터럽트 핸들러에서 globalBlinkMode 설정
 void blinkISR() {
-    blinkMode = !digitalRead(SWITCH_PIN3);
-    runner.disableAll();
-    Serial.println(blinkMode ? "Blink Mode Enabled" : "Blink Mode Disabled");
-    if (!blinkMode) startTrafficCycle();
+    globalBlinkMode = !digitalRead(SWITCH_PIN3);  // 🔹 스위치를 누르면 globalBlinkMode 토글
+    runner.disableAll();  // 🔹 TaskScheduler 비활성화
+    Serial.println(globalBlinkMode ? "Global Blink Mode Enabled" : "Global Blink Mode Disabled");
+
+    if (!globalBlinkMode) {
+        startTrafficCycle();  // 🔹 원래 신호등 주기로 복귀
+    }
 }
+
+// 🔹 스위치 3번을 눌렀을 때 모든 LED 깜빡이는 함수
+void handleGlobalBlink() {
+    static unsigned long lastBlinkTime = 0;
+    static bool state = false;
+
+    unsigned long currentMillis = millis();
+
+    if (currentMillis - lastBlinkTime >= 500) {  // 500ms마다 깜빡이기
+        lastBlinkTime = currentMillis;
+        state = !state;
+        
+        digitalWrite(RED_LED, state);
+        digitalWrite(YELLOW_LED, state);
+        digitalWrite(GREEN_LED, state);
+    }
+}
+
 
 // 초기 설정
 void setup() {
@@ -131,15 +154,43 @@ void task3() {
     t4.enableDelayed(2000);
 }
 
+// void task4() {
+//     Serial.println("TASK: task4 실행 (초록색 깜빡임 시작)");
+
+
+//     blinkMode = true;  // 🔹 깜빡임 모드 활성화
+//     // 🔹 깜빡임 초기화
+//     blinkStartTime = millis();
+//     blinkCount = 0;
+//     blinkState = false;
+// }
+
 void task4() {
     Serial.println("TASK: task4 실행 (초록색 깜빡임 시작)");
 
-
     blinkMode = true;  // 🔹 깜빡임 모드 활성화
-    // 🔹 깜빡임 초기화
-    blinkStartTime = millis();
     blinkCount = 0;
-    blinkState = false;
+    blinkStartTime = millis();
+}
+
+// 🔹 초록 LED만 깜빡이는 로직
+void handleBlinkMode() {
+    unsigned long currentMillis = millis();
+
+    if (blinkCount < 6 && currentMillis - blinkStartTime >= 250) {
+        blinkStartTime = currentMillis;
+        blinkState = !blinkState;
+        digitalWrite(GREEN_LED, blinkState);
+        blinkCount++;
+    }
+
+    if (blinkCount >= 6) {  // 3번 깜빡임 완료 후 task5 실행
+        Serial.println("TASK: 깜빡임 완료, task5 실행");
+        blinkMode = false;  // 🔹 깜빡임 모드 비활성화
+        t4.disable();
+        t5.enableDelayed(1000);
+        blinkCount = 0;
+    }
 }
 
 void task5() {
@@ -157,10 +208,13 @@ void loop() {
     portValue = analogRead(POTENTIOMETER_PIN);
     brightness = map(portValue, 0, 1023, 0, 255);
 
-    // 🔹 BRIGHTNESS 값을 확실히 한 줄로 출력
     Serial.println("BRIGHTNESS:" + String(brightness));
 
-    if (emergencyMode) {  // 긴급 모드
+    if (globalBlinkMode) {  // 🔹 스위치 3번으로 모든 LED 깜빡이기 (인터럽트)
+        Serial.println("MODE: Global Blink");
+        handleGlobalBlink();
+    } 
+    else if (emergencyMode) {  // 긴급 모드
         Serial.println("MODE: 긴급");
         analogWrite(RED_LED, brightness);
         analogWrite(YELLOW_LED, 0);
@@ -172,25 +226,12 @@ void loop() {
         analogWrite(YELLOW_LED, 0);
         analogWrite(GREEN_LED, 0);
     } 
-    else if (blinkMode) {  // 🔹 깜빡임 모드 직접 처리
-        Serial.println("MODE: 깜빡임");
-
-        if (blinkCount < 6 && currentMillis - blinkStartTime >= 250) {
-            blinkStartTime = currentMillis;
-            blinkState = !blinkState;
-            digitalWrite(GREEN_LED, blinkState);
-            blinkCount++;
-        }
-
-        if (blinkCount >= 6) {  // 3번 깜빡임 완료 후 task5 실행
-            Serial.println("TASK: 깜빡임 완료, task5 실행");
-            blinkMode = false;  // 🔹 깜빡임 모드 비활성화
-            t4.disable();  // 🔹 task4 종료
-            t5.enableDelayed(1000);
-            blinkCount = 0;  // 깜빡임 횟수 초기화
-        }
-    } 
+    else if (blinkMode) {  // 🔹 초록 LED만 깜빡이기
+        Serial.println("MODE: Green Blink");
+        handleBlinkMode();
+    }
     else {  // 기본 신호등 주기
+        Serial.println("MODE: Default");
         runner.execute();
     }
 
