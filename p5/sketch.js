@@ -108,7 +108,7 @@ function draw() {
         taskDisplay.html("Task: " + taskVal);
 
         // Task 변경 시 강조 효과 추가
-        taskDisplay.style("background-color", "red"); // 노란색 강조
+        taskDisplay.style("background-color", "red"); // 강조
         // setTimeout(() => taskDisplay.style("background-color", "transparent"), 500); // 0.5초 후 원래 색으로 복귀
       }
     }

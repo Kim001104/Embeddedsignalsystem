@@ -175,8 +175,8 @@ void task1() {
     analogWrite(YELLOW_LED, 0);
     analogWrite(GREEN_LED, 0);
 
-    t1.disable();  // ✅ 현재 Task 비활성화 (다시 실행되지 않도록)
-    t2.enableDelayed(2000);  // ✅ 2초 후 task2 실행
+    t1.disable();  //  현재 Task 비활성화 (다시 실행되지 않도록)
+    t2.enableDelayed(2000);  //  2초 후 task2 실행
 }
 
 void task2() {
@@ -185,8 +185,8 @@ void task2() {
     analogWrite(YELLOW_LED, brightness);
     analogWrite(GREEN_LED, 0);
 
-    t2.disable();  // ✅ 현재 Task 비활성화
-    t3.enableDelayed(500);  // ✅ 0.5초 후 task3 실행
+    t2.disable();  //  현재 Task 비활성화
+    t3.enableDelayed(500);  //  0.5초 후 task3 실행
 }
 
 void task3() {
@@ -195,8 +195,8 @@ void task3() {
     analogWrite(YELLOW_LED, 0);
     analogWrite(GREEN_LED, brightness);
 
-    t3.disable();  // ✅ 현재 Task 비활성화
-    t4.enableDelayed(2000);  // ✅ 2초 후 task4 실행
+    t3.disable();  //  현재 Task 비활성화
+    t4.enableDelayed(2000);  //  2초 후 task4 실행
 }
 
 void task4() {
@@ -208,8 +208,8 @@ void task4() {
         delay(250);
     }
 
-    t4.disable();  // ✅ 현재 Task 비활성화
-    t5.enableDelayed(1000);  // ✅ 1초 후 task5 실행
+    t4.disable();  //  현재 Task 비활성화
+    t5.enableDelayed(1000);  //  1초 후 task5 실행
 }
 
 void task5() {
@@ -218,7 +218,7 @@ void task5() {
     analogWrite(YELLOW_LED, brightness);
     analogWrite(GREEN_LED, 0);
 
-    t5.disable();  // ✅ 현재 Task 비활성화
-    t1.enableDelayed(500);  // ✅ 0.5초 후 다시 task1 실행 (사이클 반복)
+    t5.disable();  //  현재 Task 비활성화
+    t1.enableDelayed(500);  // 0.5초 후 다시 task1 실행 (사이클 반복)
 }
 
