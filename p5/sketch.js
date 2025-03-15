@@ -12,16 +12,16 @@ function setup() {
   createCanvas(windowWidth, windowHeight);
   background(220);
 
-  port = createSerial();
+  port = createSerial(); // 시리얼 포트 객체 생성
 
-  // 아두이노 연결 버튼
+  // 아두이노 연결 버튼 생성
   connectBtn = createButton("Connect to Arduino");
   connectBtn.position(windowWidth/2 - 100, 10);
   connectBtn.style("background-color", "#4CAF50");
   connectBtn.size(130, 30);
   connectBtn.mousePressed(connectPort);
 
-  // 아두이노 해제 버튼
+  // 아두이노 해제 버튼 생성
   disconnectBtn = createButton("Disconnect");
   disconnectBtn.position(windowWidth/2 + 100, 10);
   disconnectBtn.style("background-color", "#f44336");
@@ -41,8 +41,7 @@ function setup() {
   taskDisplay.style("width", "250px");
   taskDisplay.style("background-color", "transparent"); // 초기 배경색
 
-
-  // 밝기 값 표시
+  // 가변 저항 밝기 값 표시
   brightnessDisplay = createP("Brightness: 0");
   brightnessDisplay.position(10, 50);
   brightnessDisplay.style("font-size", "20px");
@@ -58,9 +57,7 @@ function setup() {
   modeDisplay.style("color", "#333");
   modeDisplay.size(200);
 
-  
-
-  // 빨강 신호 길이 슬라이더
+  // 빨강 신호 길이 슬라이더 생성
   redSlider = createSlider(500, 5000, redTime, 10);
   redSlider.position(10, 130);
   redSlider.size(500);
@@ -68,7 +65,7 @@ function setup() {
   redLabel = createP("Red Time: " + redTime + " ms");
   redLabel.position(windowWidth/2 - 300, 100);
 
-  // 노랑 신호 길이 슬라이더
+  // 노랑 신호 길이 슬라이더 생성
   yellowSlider = createSlider(500, 5000, yellowTime, 10);
   yellowSlider.position(10, 180);
   yellowSlider.size(500);
@@ -76,7 +73,7 @@ function setup() {
   yellowLabel = createP("Yellow Time: " + yellowTime + " ms");
   yellowLabel.position(windowWidth/2 - 300, 150);
 
-  // 초록 신호 길이 슬라이더
+  // 초록 신호 길이 슬라이더 생성
   greenSlider = createSlider(500, 5000, greenTime, 10);
   greenSlider.position(10, 230);
   greenSlider.size(500);
@@ -92,24 +89,19 @@ function draw() {
     let str = port.readUntil("\n").trim(); // 시리얼 데이터 읽기
 
     if (str.startsWith("Brightness:")) {
-      let brightVal = parseInt(str.split(":")[1].trim());
+      let brightVal = parseInt(str.split(":" )[1].trim());
       brightnessDisplay.html("Brightness: " + brightVal);
     } 
     else if (str.startsWith("MODE:")) {
-      let modeVal = str.split(":")[1].trim();
+      let modeVal = str.split(":" )[1].trim();
       modeDisplay.html("Mode: " + modeVal);
     } 
     else if (str.startsWith("TASK:")) {
-      let taskVal = str.split(":")[1].trim();
-
-      // 기존 Task와 다를 때만 업데이트 (불필요한 갱신 방지)
-      if (taskVal !== lastTask) {
-        lastTask = taskVal; // 최신 Task 값 저장
+      let taskVal = str.split(":" )[1].trim();
+      if (taskVal !== lastTask) { // 기존 Task와 다를 때만 업데이트
+        lastTask = taskVal; 
         taskDisplay.html("Task: " + taskVal);
-
-        // Task 변경 시 강조 효과 추가
-        taskDisplay.style("background-color", "red"); // 강조
-        // setTimeout(() => taskDisplay.style("background-color", "transparent"), 500); // 0.5초 후 원래 색으로 복귀
+        taskDisplay.style("background-color", "red"); // 강조 효과
       }
     }
   }

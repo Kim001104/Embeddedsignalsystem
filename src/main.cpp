@@ -3,22 +3,22 @@
 #include <PinChangeInterrupt.h>
 
 // LED 핀 정의
-const int RED_LED = 11;
-const int YELLOW_LED = 10;
-const int GREEN_LED = 9;
-const int SWITCH_PIN1 = 2;
-const int SWITCH_PIN2 = 3;
-const int SWITCH_PIN3 = 4;
-const int POTENTIOMETER_PIN = A0;
+const int RED_LED = 11;     // 빨간 LED(PWM)
+const int YELLOW_LED = 10;  // 노란 LED(PWM)
+const int GREEN_LED = 9;    // 초록 LED(PWM)
+const int SWITCH_PIN1 = 2;  // 긴급 모드 버튼
+const int SWITCH_PIN2 = 3;  // 주의 모드 버튼
+const int SWITCH_PIN3 = 4;  // 깜빡임 모드 버튼
+const int POTENTIOMETER_PIN = A0; // 조도 조절용 가변 저항
 
+// 상태 변수
+volatile bool emergencyMode = false;  // 긴급 모드 활성화 여부
+volatile bool cautionMode = false;    // 주의 모드 활성화 여부
+volatile bool blinkMode = false;      // 깜빡임 모드 활성화 여부
 
-
-volatile bool emergencyMode = false;
-volatile bool cautionMode = false;
-volatile bool blinkMode = false;
-unsigned long lastBlinkTime = 0;
-const unsigned long blinkInterval = 300;
-bool ledState = false;
+unsigned long lastBlinkTime = 0;      // 깜빡임 타이머
+const unsigned long blinkInterval = 300; // 깜빡이는 간격 (300ms)
+bool ledState = false;                // LED 상태 저장 변수
 
 // 전역 변수 선언
 int portValue = 0;
@@ -47,6 +47,9 @@ void startTrafficCycle() {
     t1.enable();
 }
 
+
+/*인터럽트 서브 루틴*/
+
 // 긴급 모드 ISR
 void emergencyISR() {
     emergencyMode = !digitalRead(SWITCH_PIN1);
@@ -74,7 +77,6 @@ void blinkISR() {
 // 깜빡임 처리 (스위치 3)
 void handleBlink() {
     unsigned long currentMillis = millis();
-
     if (currentMillis - lastBlinkTime >= blinkInterval) {
         lastBlinkTime = currentMillis;
         ledState = !ledState;
@@ -84,27 +86,27 @@ void handleBlink() {
     }
 }
 
-
-
 // 초기 설정
 void setup() {
-    Serial.begin(9600);
-    pinMode(RED_LED, OUTPUT);
-    pinMode(YELLOW_LED, OUTPUT);
+    
+    Serial.begin(9600); //p5와 시리얼 통신을 위한 설정
+    
+    pinMode(RED_LED, OUTPUT);   // LED 핀 출력으로 설정
+    pinMode(YELLOW_LED, OUTPUT);    
     pinMode(GREEN_LED, OUTPUT);
 
-    pinMode(SWITCH_PIN1, INPUT_PULLUP);
+    pinMode(SWITCH_PIN1, INPUT_PULLUP); // 버튼 핀 입력으로 설정
     pinMode(SWITCH_PIN2, INPUT_PULLUP);
     pinMode(SWITCH_PIN3, INPUT_PULLUP);
     pinMode(POTENTIOMETER_PIN, INPUT);
 
-    attachInterrupt(digitalPinToInterrupt(SWITCH_PIN1), emergencyISR, CHANGE);
+    attachInterrupt(digitalPinToInterrupt(SWITCH_PIN1), emergencyISR, CHANGE);  //하드웨어 인터럽트
     attachInterrupt(digitalPinToInterrupt(SWITCH_PIN2), cautionISR, CHANGE);
-    attachPCINT(digitalPinToPCINT(SWITCH_PIN3), blinkISR, CHANGE);
+    attachPCINT(digitalPinToPCINT(SWITCH_PIN3), blinkISR, CHANGE);  // 소프트웨어 인터럽트
 
-    Serial.println("Starting Task Scheduler...");
+    Serial.println("Starting Task Scheduler...");   //디버깅을 위한 메세지
     
-    runner.addTask(t1);
+    runner.addTask(t1); //Task 객체 추가
     runner.addTask(t2);
     runner.addTask(t3);
     runner.addTask(t4);
@@ -113,70 +115,41 @@ void setup() {
     startTrafficCycle();  // 기본 신호등 동작 시작
 }
 
+
 void loop() {
-    portValue = analogRead(POTENTIOMETER_PIN);
-    brightness = map(portValue, 0, 1023, 0, 255);
+    portValue = analogRead(POTENTIOMETER_PIN);  // 가변 저항 값 읽기
+    brightness = map(portValue, 0, 1023, 0, 255);   // PWM 값으로 변환
 
-    Serial.print("Brightness: ");
-    Serial.println(brightness);
-
-    if (Serial.available() > 0) {
-        String receivedData = Serial.readStringUntil('\n');
-        receivedData.trim();
-
-        if (receivedData.startsWith("TIME:")) {
-            int r, y, g;
-            sscanf(receivedData.c_str(), "TIME:%d,%d,%d", &r, &y, &g);
-            int redTime = r;
-            int yellowTime = y;
-            int greenTime = g;
-
-            Serial.print("Updated Times -> Red: ");
-            Serial.print(redTime);
-            Serial.print(" ms, Yellow: ");
-            Serial.print(yellowTime);
-            Serial.print(" ms, Green: ");
-            Serial.println(greenTime);
-        }
-    }
-
-    if (emergencyMode) {
+    if (emergencyMode) {    // 긴급 모드
         Serial.println("MODE: 긴급");
-        Serial.println("TASK: 긴급 정지");
         analogWrite(RED_LED, brightness);
         analogWrite(YELLOW_LED, 0);
         analogWrite(GREEN_LED, 0);
     } 
-    else if (cautionMode) {
+    else if (cautionMode) { // 주의 모드
         Serial.println("MODE: 주의");
-        Serial.println("TASK: 모든 신호 OFF");
         analogWrite(RED_LED, 0);
         analogWrite(YELLOW_LED, 0);
         analogWrite(GREEN_LED, 0);
     } 
-    else if (blinkMode) {
+    else if (blinkMode) {   // 깜빡임 모드
         Serial.println("MODE: 깜빡임");
-        Serial.println("TASK: 모든 신호 깜빡임");
         handleBlink();
     } 
-    else {
-        // Serial.println("MODE: 기본");
-        // Serial.println("TASK: 기본 동작 중");
+    else {  // 기본 신호등 주기
         runner.execute();
     }
-
-    delay(100); // p5.js로 너무 빠르게 전송하는 것을 방지
+    delay(100); // p5와의 통신을 위한 딜레이 설정 너무 빨리 보내면 데이터가 꼬일 수 있음
 }
 
-
+// Task 함수 정의
 void task1() {
-    Serial.println("TASK: task1 실행");  // 현재 Task 상태 전송
+    Serial.println("TASK: task1 실행"); 
     analogWrite(RED_LED, brightness);
     analogWrite(YELLOW_LED, 0);
     analogWrite(GREEN_LED, 0);
-
-    t1.disable();  //  현재 Task 비활성화 (다시 실행되지 않도록)
-    t2.enableDelayed(2000);  //  2초 후 task2 실행
+    t1.disable();
+    t2.enableDelayed(2000);
 }
 
 void task2() {
@@ -184,9 +157,8 @@ void task2() {
     analogWrite(RED_LED, 0);
     analogWrite(YELLOW_LED, brightness);
     analogWrite(GREEN_LED, 0);
-
-    t2.disable();  //  현재 Task 비활성화
-    t3.enableDelayed(500);  //  0.5초 후 task3 실행
+    t2.disable();
+    t3.enableDelayed(500);
 }
 
 void task3() {
@@ -194,9 +166,8 @@ void task3() {
     analogWrite(RED_LED, 0);
     analogWrite(YELLOW_LED, 0);
     analogWrite(GREEN_LED, brightness);
-
-    t3.disable();  //  현재 Task 비활성화
-    t4.enableDelayed(2000);  //  2초 후 task4 실행
+    t3.disable();
+    t4.enableDelayed(2000);
 }
 
 void task4() {
@@ -207,9 +178,8 @@ void task4() {
         analogWrite(GREEN_LED, brightness);
         delay(250);
     }
-
-    t4.disable();  //  현재 Task 비활성화
-    t5.enableDelayed(1000);  //  1초 후 task5 실행
+    t4.disable();
+    t5.enableDelayed(1000);
 }
 
 void task5() {
@@ -217,8 +187,6 @@ void task5() {
     analogWrite(RED_LED, 0);
     analogWrite(YELLOW_LED, brightness);
     analogWrite(GREEN_LED, 0);
-
-    t5.disable();  //  현재 Task 비활성화
-    t1.enableDelayed(500);  // 0.5초 후 다시 task1 실행 (사이클 반복)
+    t5.disable();
+    t1.enableDelayed(500);
 }
-
