@@ -120,6 +120,10 @@ void loop() {
     portValue = analogRead(POTENTIOMETER_PIN);  // 가변 저항 값 읽기
     brightness = map(portValue, 0, 1023, 0, 255);   // PWM 값으로 변환
 
+
+    Serial.print("BRIGHTNESS: ");
+    Serial.println(brightness);
+
     if (emergencyMode) {    // 긴급 모드
         Serial.println("MODE: 긴급");
         analogWrite(RED_LED, brightness);

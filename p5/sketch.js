@@ -87,17 +87,19 @@ let lastTask = "None"; // 마지막 Task 값 저장 (중복 업데이트 방지)
 function draw() {
   if (port.available() > 0) {
     let str = port.readUntil("\n").trim(); // 시리얼 데이터 읽기
+    console.log("Received: ", str); // 수신된 데이터를 콘솔에 출력
 
-    if (str.startsWith("Brightness:")) {
-      let brightVal = parseInt(str.split(":" )[1].trim());
+    if (str.startsWith("BRIGHTNESS:")) { // 밝기 값인 경우
+      let brightVal = parseInt(str.split(":")[1].trim());
+      console.log("Parsed Brightness: ", brightVal); // 파싱된 밝기 값 출력
       brightnessDisplay.html("Brightness: " + brightVal);
     } 
     else if (str.startsWith("MODE:")) {
-      let modeVal = str.split(":" )[1].trim();
+      let modeVal = str.split(":")[1].trim();
       modeDisplay.html("Mode: " + modeVal);
     } 
     else if (str.startsWith("TASK:")) {
-      let taskVal = str.split(":" )[1].trim();
+      let taskVal = str.split(":")[1].trim();
       if (taskVal !== lastTask) { // 기존 Task와 다를 때만 업데이트
         lastTask = taskVal; 
         taskDisplay.html("Task: " + taskVal);
