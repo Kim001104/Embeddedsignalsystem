@@ -30,7 +30,7 @@ function setup() {
   
   // 현재 실행 중인 Task 표시
   taskDisplay = createP("Task: None");
-  taskDisplay.position(windowWidth/2-85, 30);
+  taskDisplay.position(windowWidth/2-110, 30);
   taskDisplay.style("font-size", "20px");
   taskDisplay.style("font-weight", "bold");
   taskDisplay.style("color", "#333");
@@ -38,7 +38,7 @@ function setup() {
   taskDisplay.style("border", "2px solid #333");
   taskDisplay.style("border-radius", "5px");
   taskDisplay.style("text-align", "center");
-  taskDisplay.style("width", "250px");
+  taskDisplay.style("width", "300px");
   taskDisplay.style("background-color", "transparent"); // 초기 배경색
 
   // 가변 저항 밝기 값 표시

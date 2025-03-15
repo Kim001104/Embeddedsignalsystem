@@ -227,7 +227,6 @@ void loop() {
         analogWrite(GREEN_LED, 0);
     } 
     else if (blinkMode) {  // 🔹 초록 LED만 깜빡이기
-        Serial.println("MODE: Green Blink");
         handleBlinkMode();
     }
     else {  // 기본 신호등 주기
