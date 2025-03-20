@@ -68,6 +68,7 @@ void emergencyISR() {
     runner.disableAll(); // 모든 태스크 비활성화
     Serial.println(emergencyMode ? "Emergency Mode Enabled" : "Emergency Mode Disabled");
 
+    // 🔹 p5.js로 모드 전송
     Serial.print("MODE:");
     Serial.println(emergencyMode ? "Emergency" : "Normal");
     if (!emergencyMode) startTrafficCycle(); // 긴급 모드 종료 시 기본 신호등 주기 복귀
@@ -126,6 +127,7 @@ void handleGlobalBlink() {
         digitalWrite(RED_LED, state);
         digitalWrite(YELLOW_LED, state);
         digitalWrite(GREEN_LED, state);
+        Serial.print("MODE: ");
         Serial.println(state ? "All LEDs ON" : "All LEDs OFF");  // 디버깅 메시지
     }
 }

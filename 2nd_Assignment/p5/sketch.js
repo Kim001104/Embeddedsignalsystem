@@ -1,4 +1,3 @@
-//주기는 가능함. 아두이노에서 받은 값을 다시 웹 UI에 반영하는 것은 가능함.
 let port;
 let connectBtn, disconnectBtn;
 let redSlider, yellowSlider, greenSlider;
@@ -13,10 +12,10 @@ let sendTimeout;
 let timeDisplay;
 let taskDisplay; // ✅ Task 상태를 표시할 HTML 요소
 
-
 function setup() {
   createCanvas(windowWidth, windowHeight);
   background(220);
+  console.log("p5-version:", VERSION);
 
   port = createSerial();
 
@@ -38,7 +37,6 @@ function setup() {
   modeDisplay = createP("Mode: 기본");
   modeDisplay.position(10, 80);
 
-  // ✅ Task 상태 표시 요소 다시 추가
   taskDisplay = createP("Task: None");
   taskDisplay.position(windowWidth / 2 - 110, 30);
   taskDisplay.style("font-size", "20px");
@@ -50,8 +48,6 @@ function setup() {
   taskDisplay.style("text-align", "center");
   taskDisplay.style("width", "300px");
   taskDisplay.style("background-color", "transparent");
-
-  // 신호 주기 표시 요소 추가
   timeDisplay = createP("Traffic Light Timings - Red: 2000 ms, Yellow: 500 ms, Green: 2000 ms");
   timeDisplay.position(10, 110);
   timeDisplay.style("font-size", "18px");
@@ -90,7 +86,6 @@ function draw() {
     } 
     else if (str.startsWith("MODE:")) {
       let modeVal = str.split(":")[1].trim();
-      
       if (modeVal === "Emergency") {
         modeDisplay.html("MODE: 긴급 모드");
         modeDisplay.style("color", "red");
@@ -112,21 +107,14 @@ function draw() {
         let newYellowTime = parseInt(times[1]);
         let newGreenTime = parseInt(times[2]);
 
-        console.log("New Times:", newRedTime, newYellowTime, newGreenTime);
-
         if(newRedTime !== redTime || newYellowTime !== yellowTime || newGreenTime !== greenTime) {
           redTime = newRedTime;
           yellowTime = newYellowTime;
           greenTime = newGreenTime;
-    
-          timeDisplay.html(
-            `Traffic Light Timings - 🔴 Red: ${redTime} ms, 🟡 Yellow: ${yellowTime} ms, 🟢 Green: ${greenTime} ms`
-          );
-    
-          redSlider.value(newredTime);
-          yellowSlider.value(newyellowTime);
-          greenSlider.value(newgreenTime);
-
+          timeDisplay.html(`Traffic Light Timings - Red: ${redTime} ms, Yellow: ${yellowTime} ms, Green: ${greenTime} ms`);
+          redSlider.value(newRedTime);
+          yellowSlider.value(newYellowTime);
+          greenSlider.value(newGreenTime);
           sendSignalTime();
         }
       }
@@ -138,7 +126,6 @@ function draw() {
   }
 }
 
-// 아두이노 연결
 function connectPort() {
   if (!port.opened()) {
     port.open(9600);
@@ -146,18 +133,12 @@ function connectPort() {
   }
 }
 
-// 아두이노 해제
 function disconnectPort() {
   if (port.opened()) {
     port.close();
     console.log("Serial Port Closed");
   }
 }
-
-// ✅ 신호 주기 업데이트
-let lastRedTime = redTime;
-let lastYellowTime = yellowTime;
-let lastGreenTime = greenTime;
 
 function updateRedLabel() {
   redTime = redSlider.value();
@@ -179,30 +160,6 @@ function sendSignalTime() {
   sendTimeout = setTimeout(() => {
     let signalData = `TIME:${redTime},${yellowTime},${greenTime}\n`;
     console.log("Sending:", signalData);
-
-    // 🔹 이전 값과 다를 때만 전송 (중복 방지)
-    if (redTime !== lastRedTime || yellowTime !== lastYellowTime || greenTime !== lastGreenTime) {
-      port.write(signalData);
-
-      // 🔹 마지막으로 전송한 값 업데이트
-      lastRedTime = redTime;
-      lastYellowTime = yellowTime;
-      lastGreenTime = greenTime;
-    }
+    port.write(signalData);
   }, 200);
-}
-
-// 🔹 아두이노에서 받은 주기 값을 다시 웹 UI에 반영
-function updateTimingsFromArduino(red, yellow, green) {
-  redTime = red;
-  yellowTime = yellow;
-  greenTime = green;
-
-  timeDisplay.html(
-    `Traffic Light Timings - 🔴 Red: ${redTime} ms, 🟡 Yellow: ${yellowTime} ms, 🟢 Green: ${greenTime} ms`
-  );
-
-  redSlider.value(redTime);
-  yellowSlider.value(yellowTime);
-  greenSlider.value(greenTime);
 }
