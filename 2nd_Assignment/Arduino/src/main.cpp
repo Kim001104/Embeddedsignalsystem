@@ -135,6 +135,30 @@ void handleGlobalBlink() {
     }
 }
 
+void handleSerialInput() {
+    if (Serial.available()) {
+        String input = Serial.readStringUntil('\n');  // 개행 문자 기준으로 읽기
+        input.trim();
+
+        if (input.startsWith("TIME:")) {
+            int redDuration, yellowDuration, greenDuration;
+            sscanf(input.c_str(), "TIME:%d,%d,%d", &redDuration, &yellowDuration, &greenDuration);
+
+            Serial.print("New Signal Timings - Red: ");
+            Serial.print(redDuration);
+            Serial.print(" ms, Yellow: ");
+            Serial.print(yellowDuration);
+            Serial.print(" ms, Green: ");
+            Serial.println(greenDuration);
+
+            // Task 주기 변경
+            t1.setInterval(redDuration);
+            t2.setInterval(yellowDuration);
+            t3.setInterval(greenDuration);
+            t4.setInterval(greenDuration / 4); // 초록불 깜빡임 간격 조정
+        }
+    }
+}
 
 // 초기 설정
 void setup() {
@@ -263,6 +287,7 @@ void task5() {  // 노란불 켜기
 // }
 
 void loop() {
+    handleSerialInput();  // 시리얼 입력 처리
     portValue = analogRead(POTENTIOMETER_PIN);
     brightness = map(portValue, 0, 1023, 0, 255);
 
