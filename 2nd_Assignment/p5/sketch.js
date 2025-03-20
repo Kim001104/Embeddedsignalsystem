@@ -1,3 +1,4 @@
+//주기는 가능함. 아두이노에서 받은 값을 다시 웹 UI에 반영하는 것은 가능함.
 let port;
 let connectBtn, disconnectBtn;
 let redSlider, yellowSlider, greenSlider;
