@@ -290,6 +290,7 @@ void loop() {
     handleSerialInput();  // 시리얼 입력 처리
     portValue = analogRead(POTENTIOMETER_PIN);
     brightness = map(portValue, 0, 1023, 0, 255);
+    Serial.println("BRIGHTNESS: " + String(brightness));
 
     if (globalBlinkMode) {
         handleGlobalBlink();  // 🔹 모든 LED 깜빡임 모드가 최우선
