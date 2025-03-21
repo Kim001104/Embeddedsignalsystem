@@ -186,71 +186,142 @@ function drawKeypoints(hands) {
     }
   }
 }
+//왼손 오른손이 올바르게 감지 되는지
+function getHandTypes(hands) {
+  let leftHand = null;
+  let rightHand = null;
+
+  hands.forEach(hand => {
+    if (hand.handedness === "Left") {
+      leftHand = hand;
+    } else if (hand.handedness === "Right") {
+      rightHand = hand;
+    }
+  });
+
+  return { leftHand, rightHand };
+}
+
 
 // 손 제스처 인식 함수
 function processHands(hands) {
-  if (hands.length === 2) {
-    let leftHand = hands[0]; // 왼손: 어떤 LED를 조절할지 결정
-    let rightHand = hands[1]; // 오른손: 👍(증가) 또는 👎(감소)
+  console.log("🖐️ 감지된 손 개수:", hands.length);
 
-    let selectedColor = null;
+  let { leftHand, rightHand } = getHandTypes(hands);
 
-    // 왼손으로 LED 색상 선택
-    if (isOnlyThumbFinger(leftHand)) {
-      selectedColor = "red";
-    } else if (isThumbAndIndex(leftHand)) {
-      selectedColor = "yellow";
-    } else if (isThumbIndexMiddle(leftHand)) {
-      selectedColor = "green";
-    }
+  console.log("📌 왼손:", leftHand);
+  console.log("📌 오른손:", rightHand);
 
-    if (selectedColor) {
-      adjustLedTime(selectedColor, rightHand);
-    }
-    else{
+  if (hands.length === 1) {
+    if (leftHand) {
       detectModeFromLeftHand(leftHand);
+    } else {
+      console.warn("⚠️ 왼손이 감지되지 않음!");
+    }
+  }
+  else if (hands.length === 2) {
+    if (leftHand && rightHand) {
+      let selectedColor = getLeftGestureMode(leftHand);
+      console.log("🎨 감지된 색상:", selectedColor);
+
+      if (selectedColor) {
+        adjustLedTime(selectedColor, rightHand);
+      } else {
+        detectModeFromLeftHand(leftHand);
+      }
+    } else {
+      console.warn("⚠️ 왼손 또는 오른손이 감지되지 않음!");
     }
   }
 }
 
-// LED를 조절하기 위한 함수들 조합 
+    
 
-//엄지만 펼쳐진 함수(빨간색 LED주기 조절)
-function isOnlyThumbFinger(hand) {
-  let k = hand.keypoints;
+    // if (LeftIndexFinger(leftHand)) {
+    //   selectedColor = "red";
+    // } else if (LeftThumbAndIndex(leftHand)) {
+    //   selectedColor = "yellow";
+    // } else if (LeftThumbIndexMiddle(leftHand)) {
+    //   selectedColor = "green";
+    // }
+
+
+function isFingerExtended(tip, dip, pip, mcp) {
   return (
-    k[4].y < k[3].y && // 엄지 펼침
-    k[8].y > k[6].y && // 검지 접힘
-    k[12].y > k[10].y && // 중지 접힘
-    k[16].y > k[14].y && // 약지 접힘
-    k[20].y > k[18].y // 새끼손가락 접힘
+    tip.y < dip.y &&  // TIP이 DIP보다 위쪽
+    dip.y < pip.y &&  // DIP이 PIP보다 위쪽
+    pip.y < mcp.y     // PIP이 MCP보다 위쪽
   );
 }
 
-
-// 엄지,검지 펼쳐진 함수(노란색 LED주기 조절)
-function isThumbAndIndex(hand) {
+function getLeftGestureMode(hand) {
   let k = hand.keypoints;
-  return (
-    k[4].y < k[3].y &&  // thumb 펼침
-    k[8].y < k[6].y &&  // index 펼침
-    k[12].y > k[10].y &&
-    k[16].y > k[14].y &&
-    k[20].y > k[18].y
-  );
+
+  const isThumb  = isFingerExtended(k[4], k[3], k[2], k[1]);   // 엄지
+  const isIndex  = isFingerExtended(k[8], k[7], k[6], k[5]);   // 검지
+  const isMiddle = isFingerExtended(k[12], k[11], k[10], k[9]); // 중지
+  const isRing   = isFingerExtended(k[16], k[15], k[14], k[13]); // 약지
+
+  // 펼쳐진 손가락 개수 계산
+  const extended = [isThumb, isIndex, isMiddle, isRing].filter(v => v).length;
+
+  if (extended === 1 && isIndex) {
+    return "red";  // 검지만 펼침 → 빨간색 LED
+  } else if (extended === 2 && isThumb && isIndex) {
+    return "yellow"; // 엄지 + 검지 → 노란색 LED
+  } else if (extended === 3 && isThumb && isIndex && isMiddle) {
+    return "green"; // 엄지 + 검지 + 중지 → 초록색 LED
+  } else {
+    return null; // 해당 없음
+  }
 }
 
-// 엄지,검지,중지 펼쳐진 함수(초록색 LED주기 조절)
-function isThumbIndexMiddle(hand) {
-  let k = hand.keypoints;
-  return (
-    k[4].y < k[3].y &&  // thumb 펼침
-    k[8].y < k[6].y &&  // index 펼침
-    k[12].y < k[10].y && // middle 펼침
-    k[16].y > k[14].y &&
-    k[20].y > k[18].y
-  );
-}
+
+/*
+
+  왼속 검지와 오른손 검지가 있으면 주기 상승, 오른손 검지 중지가 있으면 주기 하락
+  왼속 엄지, 검지와 오른손 검지가 있으면 주기 상승, 오른손 검지 중지가 있으면 주기 하락
+  왼속 엄지,검지,중지와 오른속 검지가 있으면 주기 상승, 오른손 검지 중지가 잇으면 주기 하락
+
+*/
+
+// // 검지만 펼쳐진 함수(빨간색 LED주기 조절)
+// function LeftIndexFinger(hand) {
+//   let k = hand.keypoints;
+//   return (
+//     k[8].y < k[6].y &&  // 검지 펼침
+//     k[4].y > k[3].y &&  // 엄지 접힘
+//     k[12].y > k[10].y && // 중지 접힘
+//     k[16].y > k[14].y && // 약지 접힘
+//     k[20].y > k[18].y    // 새끼손가락 접힘
+//   );
+// }
+
+
+
+// // 엄지,검지 펼쳐진 함수(노란색 LED주기 조절)
+// function LeftThumbAndIndex(hand) {
+//   let k = hand.keypoints;
+//   return (
+//     k[4].y < k[3].y &&  // thumb 펼침
+//     k[8].y < k[6].y &&  // index 펼침
+//     k[12].y > k[10].y &&
+//     k[16].y > k[14].y &&
+//     k[20].y > k[18].y
+//   );
+// }
+
+// // 엄지,검지,중지 펼쳐진 함수(초록색 LED주기 조절)
+// function LeftThumbIndexMiddle(hand) {
+//   let k = hand.keypoints;
+//   return (
+//     k[4].y < k[3].y &&  // thumb 펼침
+//     k[8].y < k[6].y &&  // index 펼침
+//     k[12].y < k[10].y && // middle 펼침
+//     k[16].y > k[14].y &&
+//     k[20].y > k[18].y
+//   );
+// }
 
 // 검지만 펼쳐짐 (주기 증가)
 function isOnlyIndexFinger(hand) {
@@ -299,25 +370,44 @@ function adjustLedTime(color, hand) {
   }
 }
 
+/* 
+  이곳은 신호등 모드를 변경하는 함수
+  비상모드: 검지만 인식(두번째 손가락)
+  위험모드: 엄지와 검지만 인식(집게 손가락)
+  GlobalBlink모드: 엄지 검지 중지 인식(첫번째 두번째 세번째 손가락)
+  Normal모드: 엄지 검지 중지 약지 인식(모든 손 활짝 핌)
+*/
+let currentMode = "";
+let modeTimeout = null;
+
 function detectModeFromLeftHand(hand) {
+  if (!hand) {
+    console.warn("⚠️ detectModeFromLeftHand()가 null hand를 받음!");
+    return; // 함수 실행 중단
+  }
+
   let k = hand.keypoints;
 
-  let isThumb = k[4].y < k[3].y;
-  let isIndex = k[8].y < k[6].y;
-  let isMiddle = k[12].y < k[10].y;
-  let isRing = k[16].y < k[14].y;
+  if (!k) {
+    console.warn("⚠️ keypoints가 없음!");
+    return; // 함수 실행 중단
+  }
+
+  let isThumb = k[4].y < k[3].y;  // 엄지 펼침 여부
+  let isIndex = k[8].y < k[6].y;  // 검지 펼침 여부
+  let isMiddle = k[12].y < k[10].y; // 중지 펼침 여부
+  let isRing = k[16].y < k[14].y; // 약지 펼침 여부
+  let isPinky = k[20].y < k[18].y; // 소지 펼침 여부
 
   let detectedMode = "";
 
-  if (!isThumb && isIndex && !isMiddle) {
+  if (!isThumb && isIndex && !isMiddle) { // 검지만 펼쳤을 때 비상모드
     detectedMode = "Emergency";
-  } else if (!isThumb && isIndex && isMiddle && !isRing) {
-    detectedMode = "Caution";
-  } else if (isThumb && isIndex && isMiddle && !isRing) {
+  } else if (isThumb && isIndex && !isMiddle && !isRing) {
+    detectedMode = "Caution";  // ✅ 수정된 조건: 엄지 + 검지만 펼침
+  } else if (isThumb && isIndex && isMiddle && !isRing) { // 엄지,검지,중지만 펼쳤을 때 Globalblink모드
     detectedMode = "Global Blink";
-  } 
-  // ✅ 엄지 + 검지 + 중지 + 약지 → Normal 모드 복귀
-  else if (isThumb && isIndex && isMiddle && isRing) {
+  } else if (isThumb && isIndex && isMiddle && isRing && isPinky) {  // 모든 손 활짝 핌 → Normal 모드 복귀
     detectedMode = "Normal";
   }
 
@@ -325,21 +415,27 @@ function detectModeFromLeftHand(hand) {
     port.write(`MODE:${detectedMode}\n`);
     console.log("🖐️ 모드 전환:", detectedMode);
     currentMode = detectedMode;
-    resetModeTimeout(); // 선택사항: 자동 복귀 타이머 초기화
   }
 }
 
-// 일정 시간 지나면 Normal 모드 전송
-function resetModeTimeout() {
-  if (modeTimeout) clearTimeout(modeTimeout);
-  modeTimeout = setTimeout(() => {
-    if (currentMode !== "Normal") {
-      port.write("MODE:Normal\n");
-      console.log("🕒 모드 자동 복귀: Normal");
-      currentMode = "Normal";
-    }
-  }, 3000); // 3초 동안 새로운 제스처 없으면 복귀
-}
+  // console.log("🧠 손 인식됨 - 좌표 확인:");
+  // console.log("Thumb:", k[4].y, "<", k[3].y, "→", k[4].y < k[3].y);
+  // console.log("Index:", k[8].y, "<", k[6].y, "→", k[8].y < k[6].y);
+  // console.log("Middle:", k[12].y, "<", k[10].y, "→", k[12].y < k[10].y);
+  // console.log("Ring:", k[16].y, "<", k[14].y, "→", k[16].y < k[14].y);
+
+
+// // 일정 시간 지나면 Normal 모드 전송
+// function resetModeTimeout() {
+//   if (modeTimeout) clearTimeout(modeTimeout);
+//   modeTimeout = setTimeout(() => {
+//     if (currentMode !== "Normal") {
+//       port.write("MODE:Normal\n");
+//       console.log("🕒 모드 자동 복귀: Normal");
+//       currentMode = "Normal";
+//     }
+//   }, 3000); // 3초 동안 새로운 제스처 없으면 복귀
+// }
 
 // 비상모드,위험모드,Global Blink모드 전송 함수
 function sendMode(modeName) {
