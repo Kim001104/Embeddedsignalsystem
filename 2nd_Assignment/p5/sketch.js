@@ -209,8 +209,8 @@ function processHands(hands) {
 
   let { leftHand, rightHand } = getHandTypes(hands);
 
-  console.log("📌 왼손:", leftHand);
-  console.log("📌 오른손:", rightHand);
+  // console.log("📌 왼손:", leftHand);
+  // console.log("📌 오른손:", rightHand);
 
   if (hands.length === 1) {
     if (leftHand) {
@@ -260,10 +260,10 @@ function getLeftGestureMode(hand) {
   const isThumb  = isFingerExtended(k[4], k[3], k[2], k[1]);   // 엄지
   const isIndex  = isFingerExtended(k[8], k[7], k[6], k[5]);   // 검지
   const isMiddle = isFingerExtended(k[12], k[11], k[10], k[9]); // 중지
-  const isRing   = isFingerExtended(k[16], k[15], k[14], k[13]); // 약지
+  // const isRing   = isFingerExtended(k[16], k[15], k[14], k[13]); // 약지
 
   // 펼쳐진 손가락 개수 계산
-  const extended = [isThumb, isIndex, isMiddle, isRing].filter(v => v).length;
+  const extended = [isThumb, isIndex, isMiddle].filter(v => v).length;
 
   if (extended === 1 && isIndex) {
     return "red";  // 검지만 펼침 → 빨간색 LED
@@ -349,18 +349,18 @@ function isIndexAndMiddle(hand) {
 let lastUpdateTime = 0;
 
 function adjustLedTime(color, hand) {
-  let currentTime = millis(); // 현재 시간
+  let currentTime = Date.now(); // ✅ `millis()` 대신 사용
 
-  // 500ms마다 조정
-  if (currentTime - lastUpdateTime > 500) {
+  // 1초마다 조정
+  if (currentTime - lastUpdateTime > 1000) {
     if (isOnlyIndexFinger(hand)) {
       if (color === "red") redTime += 100;
       if (color === "yellow") yellowTime += 100;
       if (color === "green") greenTime += 100;
     } else if (isIndexAndMiddle(hand)) {
-      if (color === "red") redTime = max(100, redTime - 100);
-      if (color === "yellow") yellowTime = max(100, yellowTime - 100);
-      if (color === "green") greenTime = max(100, greenTime - 100);
+      if (color === "red") redTime = Math.max(100, redTime - 100);
+      if (color === "yellow") yellowTime = Math.max(100, yellowTime - 100);
+      if (color === "green") greenTime = Math.max(100, greenTime - 100);
     }
 
     console.log(`${color} LED 주기:`, eval(color + "Time"));
@@ -369,6 +369,7 @@ function adjustLedTime(color, hand) {
     lastUpdateTime = currentTime;
   }
 }
+
 
 /* 
   이곳은 신호등 모드를 변경하는 함수
@@ -411,11 +412,17 @@ function detectModeFromLeftHand(hand) {
     detectedMode = "Normal";
   }
 
+  // if (detectedMode !== "" && detectedMode !== currentMode) {
+  //   port.write(`MODE:${detectedMode}\n`);
+  //   console.log("🖐️ 모드 전환:", detectedMode);
+  //   currentMode = detectedMode;
+  // }
   if (detectedMode !== "" && detectedMode !== currentMode) {
-    port.write(`MODE:${detectedMode}\n`);
     console.log("🖐️ 모드 전환:", detectedMode);
     currentMode = detectedMode;
+    sendMode(detectedMode);  // ✅ sendMode()로 전송
   }
+  
 }
 
   // console.log("🧠 손 인식됨 - 좌표 확인:");
