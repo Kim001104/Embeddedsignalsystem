@@ -56,8 +56,9 @@ function setup() {
   modeDisplay = createP("Mode: 기본");
   modeDisplay.position(10, 80);
 
+  // 현재 실행 중인 Task 표시
   taskDisplay = createP("Task: None");
-  taskDisplay.position(windowWidth / 2 - 110, 30);
+  taskDisplay.position(windowWidth/2-110, 30);
   taskDisplay.style("font-size", "20px");
   taskDisplay.style("font-weight", "bold");
   taskDisplay.style("color", "#333");
@@ -66,32 +67,55 @@ function setup() {
   taskDisplay.style("border-radius", "5px");
   taskDisplay.style("text-align", "center");
   taskDisplay.style("width", "300px");
-  taskDisplay.style("background-color", "transparent");
-  timeDisplay = createP("Traffic Light Timings - Red: 2000 ms, Yellow: 500 ms, Green: 2000 ms");
-  timeDisplay.position(10, 110);
-  timeDisplay.style("font-size", "18px");
-  timeDisplay.style("font-weight", "bold");
+  taskDisplay.style("background-color", "transparent"); // 초기 배경색
 
+  // 가변 저항 밝기 값 표시
+  brightnessDisplay = createP("Brightness: 0");
+  brightnessDisplay.position(10, 10);
+  brightnessDisplay.style("font-size", "20px");
+  brightnessDisplay.style("font-weight", "bold");
+  brightnessDisplay.style("color", "#333");
+  brightnessDisplay.size(200);
+
+  // 현재 모드 표시
+  modeDisplay = createP("MODE: 기본");
+  modeDisplay.position(10, 50);
+  modeDisplay.style("font-size", "20px");
+  modeDisplay.style("font-weight", "bold");
+  modeDisplay.style("color", "green"); // ← 기본색을 눈에 띄게
+  modeDisplay.size(200);
+  
+
+  // 빨강 신호 길이 슬라이더 생성
   redSlider = createSlider(500, 5000, redTime, 10);
-  redSlider.position(10, 160);
+  redSlider.position(10, 130);
   redSlider.size(500);
   redSlider.input(updateRedLabel);
   redLabel = createP("Red Time: " + redTime + " ms");
-  redLabel.position(550, 140);
+  redLabel.position(windowWidth/2 - 300, 100);
 
+  // 노랑 신호 길이 슬라이더 생성
   yellowSlider = createSlider(500, 5000, yellowTime, 10);
-  yellowSlider.position(10, 210);
+  yellowSlider.position(10, 180);
   yellowSlider.size(500);
   yellowSlider.input(updateYellowLabel);
   yellowLabel = createP("Yellow Time: " + yellowTime + " ms");
-  yellowLabel.position(550, 190);
+  yellowLabel.position(windowWidth/2 - 300, 150);
 
+  // 초록 신호 길이 슬라이더 생성
   greenSlider = createSlider(500, 5000, greenTime, 10);
-  greenSlider.position(10, 260);
+  greenSlider.position(10, 230);
   greenSlider.size(500);
   greenSlider.input(updateGreenLabel);
   greenLabel = createP("Green Time: " + greenTime + " ms");
-  greenLabel.position(550, 240);
+  greenLabel.position(windowWidth/2 - 300, 200);
+
+  // 신호등 주기 정보 표시 요소 추가 (슬라이더 아래에)
+  timeDisplay = createP(`Traffic Light Timings - Red: ${redTime} ms, Yellow: ${yellowTime} ms, Green: ${greenTime} ms`);
+  timeDisplay.position(10, 280);
+  timeDisplay.style("font-size", "16px");
+  timeDisplay.style("color", "#333");
+  timeDisplay.style("font-weight", "bold");
 }
 
 function draw() {
@@ -124,8 +148,7 @@ function draw() {
     } 
     
     else if (str.startsWith("MODE:")) {   // MODE 데이터를 수신 받으면 파싱함.
-      console.log("📥 수신된 modeVal:", JSON.stringify(modeVal));
-
+      
       let modeVal = str.split(":")[1].trim();
 
       if (modeVal === "Emergency") {  // Emergency 수신시 긴급모드라고 html요소로 출력함.

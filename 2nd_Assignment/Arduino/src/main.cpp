@@ -36,6 +36,10 @@ int redDuration = 2000;   // 🔴 빨간불 기본 주기
 int yellowDuration = 500;  // 🟡 노란불 기본 주기
 int greenDuration = 2000;  // 🟢 초록불 기본 주기
 
+// 전역으로 선언
+bool isRedOn = false;
+unsigned long redStartTime = 0;
+
 // TaskScheduler 객체 생성
 Scheduler runner;
 
@@ -56,9 +60,9 @@ Task t5(yellowDuration, TASK_FOREVER, &task5, &runner, false);
 // 기본 신호등 주기 시작
 void startTrafficCycle() {
     Serial.println("Starting Traffic Cycle...");
-    runner.disableAll(); // 모든 Task 비활성화
-    t1.enable();         // t1 즉시 활성화
-    // t1.execute();        // 🔹 첫 번째 빨간불 Task 즉시 실행
+    runner.disableAll();
+    isRedOn = false;  // 🔧 초기화 중요
+    t1.restart();     // TaskScheduler가 바로 다음 루프에서 task1 호출
 }
 
 /* 인터럽트 서비스 루틴 (ISR) 정의 */
@@ -67,11 +71,10 @@ void startTrafficCycle() {
 void emergencyISR() {
     emergencyMode = !digitalRead(SWITCH_PIN1);
     runner.disableAll(); // 모든 태스크 비활성화
-    Serial.println(emergencyMode ? "Emergency Mode Enabled" : "Emergency Mode Disabled");
+    // Serial.println(emergencyMode ? "Emergency Mode Enabled" : "Emergency Mode Disabled");
 
     // 🔹 p5.js로 모드 전송
-    Serial.print("MODE:");
-    Serial.println(emergencyMode ? "Emergency" : "Normal");
+    Serial.println(emergencyMode ? "MODE:Emergency" : "MODE:Normal");
     if (!emergencyMode) startTrafficCycle(); // 긴급 모드 종료 시 기본 신호등 주기 복귀
 }
 
@@ -101,14 +104,14 @@ void enterEmergencyMode(bool enable) {
     }
 }
 
+// 주의 모드 ISR (스위치 2번)
 void cautionISR() {
     cautionMode = !digitalRead(SWITCH_PIN2);
     runner.disableAll();
-    Serial.println(cautionMode ? "Caution Mode Enabled" : "Caution Mode Disabled");
+    // Serial.println(cautionMode ? "Caution Mode Enabled" : "Caution Mode Disabled");
 
     // 🔹 p5.js로 모드 전송
-    Serial.print("MODE: ");
-    Serial.println(cautionMode ? "Caution" : "Normal");
+    Serial.println(cautionMode ? "MODE:Caution" : "MODE:Normal");
 
     if (cautionMode) {
         // 주의 모드에서는 모든 LED 끄기
@@ -146,15 +149,16 @@ void enterCautionMode(bool enable) {
     }
 }
 
+// 글로벌 깜빡임 모드 ISR (스위치 3번)
 void blinkISR() {
     globalBlinkMode = !digitalRead(SWITCH_PIN3);
     runner.disableAll();  // 모든 Task 중지
-    Serial.println(globalBlinkMode ? "Global Blink Mode Enabled" : "Global Blink Mode Disabled");
+    // Serial.println(globalBlinkMode ? "Global Blink Mode Enabled" : "Global Blink Mode Disabled");
 
 
     // 🔹 p5.js로 모드 전송
-    Serial.print("MODE: ");
-    Serial.println(globalBlinkMode ? "Global Blink" : "Normal");
+    Serial.println(globalBlinkMode ? "MODE:Global Blink" : "MODE:Normal");
+
 
     if (globalBlinkMode) {
         // 🔹 LED 초기 상태를 꺼두고 깜빡임 시작
@@ -166,6 +170,7 @@ void blinkISR() {
     }
 }
 
+// 모든 LED 깜빡이기 (글로벌 블링크 모드)
 void handleGlobalBlink() {
     static unsigned long lastBlinkTime = 0;
     static bool state = false;
@@ -180,8 +185,8 @@ void handleGlobalBlink() {
         digitalWrite(RED_LED, state);
         digitalWrite(YELLOW_LED, state);
         digitalWrite(GREEN_LED, state);
-        Serial.print("MODE: ");
-        Serial.println(state ? "All LEDs ON" : "All LEDs OFF");  // 디버깅 메시지
+        Serial.print("Task:");
+        Serial.println(state ? "Global Blink" : "All LEDs OFF");  // 디버깅 메시지
     }
 }
 
@@ -254,7 +259,9 @@ void handleSerialInput() {
 
                 // 3️⃣ 업데이트된 주기로 첫 Task부터 다시 실행
                 Serial.println("🚦 Restarting Traffic Light Cycle...");
-                t1.enableDelayed(0);  // ✅ 첫 Task(Red)부터 다시 실행
+                runner.disableAll();  // 혹시 실행 중인 Task 모두 중단
+                t1.restart();         // 강제로 처음부터 시작
+                
                 
                 // 4️⃣ 변경된 값을 p5.js로 다시 전송하여 UI 업데이트
                 Serial.print("TIME:");
@@ -265,34 +272,6 @@ void handleSerialInput() {
                 Serial.println(greenDuration);
             }
         } 
-        else if (input.startsWith("MODE:")) {
-            String mode = input.substring(5); // "Emergency", "Caution", "Global Blink" 등
-        
-            Serial.print("📥 모드 수신: ");
-            Serial.println(mode);
-        
-            // 기존 Task 종료
-            runner.disableAll();
-        
-            if (mode == "Emergency") {
-                enterEmergencyMode(true);
-            }
-            else if (mode == "Caution") {
-                enterCautionMode(true);
-            }
-            else if (mode == "Global Blink") {
-                enterGlobalBlinkMode(true);
-            } else if(mode == "Normal"){
-                enterEmergencyMode(false);
-                enterCautionMode(false);
-                enterGlobalBlinkMode(false);
-            }
-        
-            // 모드 정보 p5.js에 다시 전송
-            Serial.print("MODE:");
-            Serial.println(mode);
-        }
-        
     }
 }
 
@@ -322,12 +301,13 @@ void setup() {
     startTrafficCycle();    // 초기 신호등 주기 시작
 }
 
+// Task 함수 정의 (신호등 동작 관리)
 void task1() {      // 빨간불 켜기
-    static unsigned long startTime = 0;
-    static bool isOn = false;
 
-    if (!isOn) {
-        task1StartTime = millis();
+
+    if (!isRedOn) {
+        redStartTime = millis();
+        isRedOn = true;
         Serial.print("TASK:RED,");
         Serial.print(redDuration);
         Serial.println(" ms");
@@ -342,20 +322,17 @@ void task1() {      // 빨간불 켜기
         analogWrite(RED_LED, brightness);
         analogWrite(YELLOW_LED, 0);
         analogWrite(GREEN_LED, 0);
-
-        isOn = true;
-        startTime = millis();
     }
 
-    if (millis() - startTime >= (unsigned long)redDuration) {
+    if (millis() - redStartTime >= (unsigned long)redDuration) {
         analogWrite(RED_LED, 0);
-        isOn = false;
+        isRedOn = false;
         t1.disable();
         t2.enable();  // ✅ 빨간불 유지 후 노란불 Task 실행
     }
 }
 
-void task2() {      // 노란불 켜기
+void task2() {    // 노란불 켜기
     static unsigned long startTime = 0;
     static bool isOn = false;
 
@@ -444,7 +421,7 @@ void handleBlinkMode() {    // 초록 LED 깜빡임 모드
         // Serial.println("TASK5: Blink Done, YELLOW ON");
         blinkMode = false;
         t4.disable();
-        t5.enableDelayed(1000); // 1초 후 노란불 켜기
+        t5.enable();
         blinkCount = 0;
     }
 }
@@ -481,7 +458,9 @@ void task5() {  // 노란불 켜기
         t1.enable();  // ✅ 노란불 유지 후 빨간불 Task 실행
     }
 }
+
 unsigned long lastBrightnessSent = 0;
+
 void loop() {
     handleSerialInput();  // 시리얼 입력 처리
     portValue = analogRead(POTENTIOMETER_PIN);
@@ -509,5 +488,4 @@ void loop() {
         runner.execute();
     }
 
-    delay(100);
 }
