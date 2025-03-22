@@ -46,15 +46,15 @@ function setup() {
 
   // 가변 저항 밝기 값 표시
   brightnessDisplay = createP("Brightness: 0");
-  brightnessDisplay.position(10, 50);
-  brightnessDisplay.style("font-size", "15px");
+  brightnessDisplay.position(10, 10);
+  brightnessDisplay.style("font-size", "20px");
   brightnessDisplay.style("font-weight", "bold");
   brightnessDisplay.style("color", "#333");
   brightnessDisplay.size(200);
 
   // 현재 모드 표시
   modeDisplay = createP("MODE: 기본");
-  modeDisplay.position(10, 80);
+  modeDisplay.position(10, 50);
   modeDisplay.style("font-size", "20px");
   modeDisplay.style("font-weight", "bold");
   modeDisplay.style("color", "green"); // ← 기본색을 눈에 띄게
