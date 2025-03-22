@@ -328,12 +328,28 @@ function adjustLedTime(rightHand, selectedColor) {
         console.log("After:",greenTime);
       }
     }
+    // 슬라이더와 레이블 동기화 (조정된 경우에만)
+    if (selectedColor === "red") {
+      redSlider.value(redTime);
+      redLabel.html("Red Time: " + redTime + " ms");
+    }
+    if (selectedColor === "yellow") {
+      yellowSlider.value(yellowTime);
+      yellowLabel.html("Yellow Time: " + yellowTime + " ms");
+    }
+    if (selectedColor === "green") {
+      greenSlider.value(greenTime);
+      greenLabel.html("Green Time: " + greenTime + " ms");
+    }
     
 
     console.log(`${selectedColor} 조정됨 →`, eval(selectedColor + "Time"));
-    sendSignalTime();
-    lastUpdateTime = now;
+    sendSignalTime(); //아두이노로 전송
+    updateTimeDisplay(); //전체 시간 표시 업데이트
+    lastUpdateTime = now; //시간 업데이트
   }
+
+  
 }
 
 
