@@ -221,6 +221,10 @@ void handleSerialInput() {
     if (Serial.available()) {
         String input = Serial.readStringUntil('\n');  
         input.trim();
+    
+        Serial.print("📥 수신된 전체 문자열: [");
+        Serial.print(input);
+        Serial.println("]");
 
         if (input.startsWith("TIME:")) {    //p5로 부터 받은 시간값을 새로운 주기로 업데이트 시킴킴
             int newRed, newYellow, newGreen;
@@ -271,7 +275,34 @@ void handleSerialInput() {
                 Serial.print(",");
                 Serial.println(greenDuration);
             }
-        } 
+        }
+        
+                // 🔴 MODE: 처리
+    // MODE 처리
+    if (input.startsWith("MODE:")) {
+        String mode = input.substring(5);
+        mode.trim();  // 🔥 꼭 필요!
+  
+        Serial.print("💬 수신된 모드: [");
+        Serial.print(mode);
+        Serial.println("]");
+        Serial.print("→ 길이: ");
+        Serial.println(mode.length());
+  
+        if (mode.equals("Emergency")) {
+          enterEmergencyMode(true);
+        } else if (mode.equals("Caution")) {
+          enterCautionMode(true);
+        } else if (mode.equals("Global Blink")) {
+          enterGlobalBlinkMode(true);
+        } else if (mode.equals("Normal")) {
+          enterEmergencyMode(false);
+          enterCautionMode(false);
+          enterGlobalBlinkMode(false);
+        } else {
+          Serial.println("⚠️ 알 수 없는 모드 수신됨!");
+        }
+      }
     }
 }
 
