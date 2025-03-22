@@ -81,7 +81,6 @@ void startTrafficCycle() {
     t1.restart();     // TaskScheduler가 바로 다음 루프에서 task1 호출
 }
 
-
 /* 인터럽트 서비스 루틴 (ISR) 정의 */
 
 // 긴급 모드 ISR (스위치 1번)
