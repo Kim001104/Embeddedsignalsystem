@@ -12,7 +12,7 @@ let sendTimeout;  // 시간 조절 슬라이더 변경 시 시리얼 통신 지�
 let timeDisplay;  // Red, Yellow, Green 시간을 표시할 HTML 요소
 let taskDisplay; // ✅ Task 상태를 표시할 HTML 요소
 
-
+// 비디오 객체 설정
 let handPose; // HandPose 모델
 let video;  // 비디오 스트림
 let hands = []; // 손 정보
@@ -124,7 +124,8 @@ function draw() {
     } 
     
     else if (str.startsWith("MODE:")) {   // MODE 데이터를 수신 받으면 파싱함.
-      
+      console.log("📥 수신된 modeVal:", JSON.stringify(modeVal));
+
       let modeVal = str.split(":")[1].trim();
 
       if (modeVal === "Emergency") {  // Emergency 수신시 긴급모드라고 html요소로 출력함.

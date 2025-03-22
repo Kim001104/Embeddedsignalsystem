@@ -481,12 +481,17 @@ void task5() {  // 노란불 켜기
         t1.enable();  // ✅ 노란불 유지 후 빨간불 Task 실행
     }
 }
-
+unsigned long lastBrightnessSent = 0;
 void loop() {
     handleSerialInput();  // 시리얼 입력 처리
     portValue = analogRead(POTENTIOMETER_PIN);
     brightness = map(portValue, 0, 1023, 0, 255);
-    Serial.println("BRIGHTNESS: " + String(brightness));
+    // 500ms마다 밝기 값 전송
+    if (millis() - lastBrightnessSent > 500) {
+        Serial.print("BRIGHTNESS:");
+        Serial.println(brightness);
+        lastBrightnessSent = millis();
+    }
 
     if (globalBlinkMode) {
         handleGlobalBlink();  // 🔹 모든 LED 깜빡임 모드가 최우선
