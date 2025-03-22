@@ -12,7 +12,7 @@
 ![Image](https://github.com/user-attachments/assets/ed9204aa-1d3a-4554-8ae0-ec2f1d5c6184)
 
 ## 아두이노 코드 
-![Image](https://github.com/user-attachments/assets/bfbdbbc5-786c-42f8-ae79-bc5e3304e896)
+
 ![Image](https://github.com/user-attachments/assets/7fb85746-08ad-4f86-8682-0fa2f7755dca)
 ![Image](https://github.com/user-attachments/assets/f1487f08-0f74-4556-8552-6d2f907e039c)
 ![Image](https://github.com/user-attachments/assets/a9d46236-db55-442a-9f6c-dcffa473270a)
@@ -20,9 +20,17 @@
 ![Image](https://github.com/user-attachments/assets/e7f3471a-78e0-4e65-b0f6-8e9f8928123c)
 
 ## 아두이노 코드 설명
-p5 ml5의 동작으로 부터 받은 시리얼 데이터를 통하여 주기와 모드를 변경 할 수 있는 시리얼 핸들러 함수를 추가적으로 구성함.
-스위치 동작으로 인한 모드 변경 함수와 모션 인식을 통한 모드 변경 함수가 겹치지 않도록 모션 인식을 통한 모드 변경 함수는 추가적으로 만들어서
-혼잡이 발생하지 않도록 함.
+이 코드는 **p5.js + ml5.js에서 인식된 손 제스처**를 기반으로, **시리얼 통신을 통해 아두이노의 LED 신호등을 제어**하는 구조로 되어 있습니다.
+기존 신호등 제어 코드에 p5로부터 수신 받은 데이터를 바탕으로 추가적인 모드 변경 함수를 생성하여 손 모양을 인식하고 모드 변경 및 LED 주기를 컨트롤 할 수 있는 코드를 추가하였습니다.
+
+모션 인식을 통한 모드의 변경이 가해졌을 때 그 모드를 유지하게 되고 모션 인식을 통한 LED의 주기 변경이 가해졌을 때 아두이노는 현재 task를 종료하고 주기를 업데이트 한 후에 task1부터 실행 할 수 있도록 코드를 구성하였습니다.
+
+### 주요 기능
+- **TaskScheduler**를 사용한 LED 제어 (신호등 주기 순차 실행)
+- **p5.js로부터 수신된 시리얼 데이터 기반 모드 전환 및 주기 조절**
+- **하드웨어 스위치 및 손 모션(ml5.js)** 기반 모드 변경 가능
+- **가변 저항을 통한 LED 밝기 조절 (PWM)**
+---
 
 ## ✅ 주요 기능 요약
 
@@ -49,6 +57,16 @@ p5 ml5의 동작으로 부터 받은 시리얼 데이터를 통하여 주기와 
 - 슬라이더로도 수동 조절 가능하며, 실시간 UI 업데이트가 반영됩니다.
 
 ---
+
+## p5 코드
+![Image](https://github.com/user-attachments/assets/3855a274-d465-44ee-abe0-83ec270c8308)
+![Image](https://github.com/user-attachments/assets/b2352525-06ca-4344-9183-a7a1bdd09efd)
+![Image](https://github.com/user-attachments/assets/fb44f044-e068-4451-9f84-7a79d49f97aa)
+
+### p5 코드 설명
+기존 프로젝트에서 슬라이더를 통하여 LED의 주기를 조절하는 부분에서 업데이트 하여 ml5를 통한 손 인식을 통한 LED의 주기 조절과 모드를 변경 할 수 있는 함수들을 추가함.
+모드 변경 모션 인식 혹은 LED의 주기 변경 모션을 하게 되면 해당 값을 시리얼 데이터로 보내서 실질적으로 아두이노가 주기의 업데이트 모드의 변경을 가능하게 함.
+
 
 ## 🔧 시스템 구성
 

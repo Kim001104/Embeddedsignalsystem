@@ -129,7 +129,7 @@ function draw() {
       let brightVal = parseInt(str.split(":")[1].trim()); // 밝기 값 추출
       brightnessDisplay.html("Brightness: " + brightVal); // 밝기 값 HTML 요소에 출력
     } 
-    
+    // 이 함수는 스위치 동작을 통한 모드에 대한 시리얼 데이터를 파싱받아서 UI로 보여주는 함수수
     else if (str.includes("MODE:")) {
       let modePart = str.split("MODE:")[1]?.trim();
       console.log("📥 수신된 modeVal:", JSON.stringify(modePart));
@@ -228,6 +228,7 @@ function processHands(hands) {
   }
 }
 
+// 손가락이 펼쳐졌는지 여부를 판단하는 함수
 function isFingerExtended(tip, dip, pip, mcp) {
   return (
     tip.y < dip.y &&  // TIP이 DIP보다 위쪽
@@ -236,6 +237,12 @@ function isFingerExtended(tip, dip, pip, mcp) {
   );
 }
 
+
+/*
+  이곳은 신호등의 주기를 모션을 통하여 컨트롤 하는 함수입니다.
+*/
+
+// 손 제스처에 따라 조절할 LED 색상을 결정하는 함수
 function getLeftGestureMode(hand) {
   let k = hand.keypoints;
 
@@ -263,14 +270,7 @@ function getLeftGestureMode(hand) {
 }
 
 
-
-/*
-
-  왼속 검지와 오른손 검지가 있으면 주기 상승, 오른손 검지 중지가 있으면 주기 하락
-  왼속 엄지, 검지와 오른손 검지가 있으면 주기 상승, 오른손 검지 중지가 있으면 주기 하락
-  왼속 엄지,검지,중지와 오른속 검지가 있으면 주기 상승, 오른손 검지 중지가 잇으면 주기 하락
-
-*/
+// 따봉을 통한 주기 올리기 함수수
 function isThumbsUp(hand) {
   if (!hand || !hand.keypoints || hand.keypoints.length < 21) return false;
   const k = hand.keypoints;
@@ -285,6 +285,7 @@ function isThumbsUp(hand) {
   );
 }
 
+// 브이를 통한 주기 내리기 함수수
 function isIndexAndMiddle(hand) {
   if (!hand || !hand.keypoints || hand.keypoints.length < 21) return false;
   const k = hand.keypoints;
@@ -339,10 +340,10 @@ function adjustLedTime(rightHand, selectedColor) {
 
 /* 
   이곳은 신호등 모드를 변경하는 함수
-  비상모드: 검지만 인식(두번째 손가락)
-  위험모드: 엄지와 검지만 인식(집게 손가락)
-  GlobalBlink모드: 엄지 검지 중지 인식(첫번째 두번째 세번째 손가락)
-  Normal모드: 엄지 검지 중지 약지 인식(모든 손 활짝 핌)
+  비상모드: 엄지와 소지
+  위험모드: 주먹
+  GlobalBlink모드: 검지 중지 약지지 인식(첫번째 두번째 세번째 손가락)
+  Normal모드: 다섯 손가락 다 핌핌
 */
 let currentMode = "";
 let modeTimeout = null;
