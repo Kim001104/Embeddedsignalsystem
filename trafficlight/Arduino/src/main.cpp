@@ -246,7 +246,7 @@ void task1() {      // 빨간불 켜기
     if (!isRedOn) {
         redStartTime = millis();
         isRedOn = true;
-        Serial.print("TASK:RED,");
+        Serial.print("TASK:RED(task1),");
         Serial.print(redDuration);
         Serial.println(" ms");
 
@@ -276,7 +276,7 @@ void task2() {    // 노란불 켜기
 
     if (!isOn) {
         task2StartTime = millis();
-        Serial.print("TASK:YELLOW,");
+        Serial.print("TASK:YELLOW(task2),");
         Serial.print(yellowDuration);
         Serial.println(" ms");
 
@@ -309,7 +309,7 @@ void task3() {      // 초록불 켜기
 
     if (!isOn) {
         task3StartTime = millis();
-        Serial.print("TASK:GREEN,");
+        Serial.print("TASK:GREEN(task3),");
         Serial.print(greenDuration);
         Serial.println(" ms");
 
@@ -338,7 +338,7 @@ void task3() {      // 초록불 켜기
 
 void task4() {      // 초록불 깜빡임
     task4StartTime = millis();
-    Serial.println("TASK: GREEN BLINKING");
+    Serial.println("TASK: GREEN BLINKING(task4)");
     blinkMode = true;
     blinkCount = 0;
     blinkStartTime = millis();
@@ -367,7 +367,7 @@ void task5() {  // 노란불 켜기
 
     if (!isOn) {
         task2StartTime = millis();
-        Serial.print("TASK:YELLOW,");
+        Serial.print("TASK:YELLOW(task5),");
         Serial.print(yellowDuration);
         Serial.println(" ms");
 
