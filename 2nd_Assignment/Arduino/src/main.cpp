@@ -57,7 +57,8 @@ Task t5(yellowDuration, TASK_FOREVER, &task5, &runner, false);
 void startTrafficCycle() {
     Serial.println("Starting Traffic Cycle...");
     runner.disableAll(); // 모든 Task 비활성화
-    t1.enableDelayed(0); // 0초 후 빨간불 켜기
+    t1.enable();         // t1 즉시 활성화
+    // t1.execute();        // 🔹 첫 번째 빨간불 Task 즉시 실행
 }
 
 /* 인터럽트 서비스 루틴 (ISR) 정의 */
