@@ -122,7 +122,7 @@ void cautionISR() {
         startTrafficCycle();
     }
 }
-
+// 모션 동작을 통한 위험 모드
 void enterCautionMode(bool enable) {
     cautionMode = enable;
     runner.disableAll();

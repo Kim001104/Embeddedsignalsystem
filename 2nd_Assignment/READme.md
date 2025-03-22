@@ -11,6 +11,19 @@
 ## 아두이노 회로도 
 ![Image](https://github.com/user-attachments/assets/ed9204aa-1d3a-4554-8ae0-ec2f1d5c6184)
 
+## 아두이노 코드 
+![Image](https://github.com/user-attachments/assets/bfbdbbc5-786c-42f8-ae79-bc5e3304e896)
+![Image](https://github.com/user-attachments/assets/7fb85746-08ad-4f86-8682-0fa2f7755dca)
+![Image](https://github.com/user-attachments/assets/f1487f08-0f74-4556-8552-6d2f907e039c)
+![Image](https://github.com/user-attachments/assets/a9d46236-db55-442a-9f6c-dcffa473270a)
+![Image](https://github.com/user-attachments/assets/fe83af9a-0da8-4ac5-9cb3-7d21cb90de33)
+![Image](https://github.com/user-attachments/assets/e7f3471a-78e0-4e65-b0f6-8e9f8928123c)
+
+## 아두이노 코드 설명
+p5 ml5의 동작으로 부터 받은 시리얼 데이터를 통하여 주기와 모드를 변경 할 수 있는 시리얼 핸들러 함수를 추가적으로 구성함.
+스위치 동작으로 인한 모드 변경 함수와 모션 인식을 통한 모드 변경 함수가 겹치지 않도록 모션 인식을 통한 모드 변경 함수는 추가적으로 만들어서
+혼잡이 발생하지 않도록 함.
+
 ## ✅ 주요 기능 요약
 
 ### ✋ 모드 제어 (왼손 제스처로만 인식)
