@@ -12,3 +12,27 @@
 
 ## 코드 설명
 ![Image](https://github.com/user-attachments/assets/ba3f2314-6f7c-496c-bc09-bde5b318b0c4)
+**#!/usr/bin/bash는 이 스크립트를 Bash 셸에서 실행하도록 지정하는 쉐뱅(shebang)입니다.**
+이 스크립트는 GPIO 18, 23, 24번 핀에 연결된 3개의 LED를 이용해,
+이진수 형태로 0부터 7까지 숫자를 표시하는 LED 카운터입니다.
+
+pins 배열을 통해 사용할 핀 번호(18, 23, 24)를 저장하고,
+
+반복문을 통해 각각의 핀을 **출력 모드(output)**로 설정합니다.
+
+그 다음, i=0~7까지 8번 반복하면서:
+
+숫자 i를 이진수로 변환해 각 비트를 추출하고,
+
+추출된 비트가 1이면 해당 핀(GPIO)을 HIGH(ON), 0이면 LOW(OFF) 하여 LED 상태를 결정합니다.
+
+최종적으로 모든 LED는 OFF 상태로 종료됩니다.
+i	이진수	LED2 (pin 18)	LED1 (pin 23)	LED0 (pin 24)
+0	000	⚫ OFF	⚫ OFF	⚫ OFF
+1	001	⚫ OFF	⚫ OFF	🔴 ON
+2	010	⚫ OFF	🔴 ON	⚫ OFF
+3	011	⚫ OFF	🔴 ON	🔴 ON
+4	100	🔴 ON	⚫ OFF	⚫ OFF
+5	101	🔴 ON	⚫ OFF	🔴 ON
+6	110	🔴 ON	🔴 ON	⚫ OFF
+7	111	🔴 ON	🔴 ON	🔴 ON
