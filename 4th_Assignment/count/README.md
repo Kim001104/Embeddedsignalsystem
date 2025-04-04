@@ -29,12 +29,14 @@ pins 배열을 통해 사용할 핀 번호(18, 23, 24)를 저장하고,
 추출된 비트가 1이면 해당 핀(GPIO)을 HIGH(ON), 0이면 LOW(OFF) 하여 LED 상태를 결정합니다.
 
 최종적으로 모든 LED는 OFF 상태로 종료됩니다.
-i	이진수	LED2 (pin 18)	LED1 (pin 23)	LED0 (pin 24)
-0	000	⚫ OFF	⚫ OFF	⚫ OFF
-1	001	⚫ OFF	⚫ OFF	🔴 ON
-2	010	⚫ OFF	🔴 ON	⚫ OFF
-3	011	⚫ OFF	🔴 ON	🔴 ON
-4	100	🔴 ON	⚫ OFF	⚫ OFF
-5	101	🔴 ON	⚫ OFF	🔴 ON
-6	110	🔴 ON	🔴 ON	⚫ OFF
-7	111	🔴 ON	🔴 ON	🔴 ON
+<추가 설명>
+| i | 이진수 | LED2 (pin 18) | LED1 (pin 23) | LED0 (pin 24) |
+|---|--------|----------------|----------------|----------------|
+| 0 | 000    | ⚫ OFF          | ⚫ OFF          | ⚫ OFF          |
+| 1 | 001    | ⚫ OFF          | ⚫ OFF          | 🔴 ON           |
+| 2 | 010    | ⚫ OFF          | 🔴 ON           | ⚫ OFF          |
+| 3 | 011    | ⚫ OFF          | 🔴 ON           | 🔴 ON           |
+| 4 | 100    | 🔴 ON           | ⚫ OFF          | ⚫ OFF          |
+| 5 | 101    | 🔴 ON           | ⚫ OFF          | 🔴 ON           |
+| 6 | 110    | 🔴 ON           | 🔴 ON           | ⚫ OFF          |
+| 7 | 111    | 🔴 ON           | 🔴 ON           | 🔴 ON           |
