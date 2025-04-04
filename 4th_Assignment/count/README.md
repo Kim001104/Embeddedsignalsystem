@@ -10,8 +10,10 @@
 ## 회로 구성
 ![Image](https://github.com/user-attachments/assets/4c58c5a8-48d8-41d3-b6e7-3a0027d59efb)
 
+## 코드 이미지지
+![Image](https://github.com/user-attachments/assets/ba3f2314-6f7c-496c-bc09-bde5b318b0c4)\
+
 ## 코드 설명
-![Image](https://github.com/user-attachments/assets/ba3f2314-6f7c-496c-bc09-bde5b318b0c4)
 **#!/usr/bin/bash는 이 스크립트를 Bash 셸에서 실행하도록 지정하는 쉐뱅(shebang)입니다.**
 이 스크립트는 GPIO 18, 23, 24번 핀에 연결된 3개의 LED를 이용해,
 이진수 형태로 0부터 7까지 숫자를 표시하는 LED 카운터입니다.

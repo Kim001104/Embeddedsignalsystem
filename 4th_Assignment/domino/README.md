@@ -10,8 +10,10 @@
 ## 회로 구성
 ![Image](https://github.com/user-attachments/assets/037cb5ed-d59f-4b2b-959f-78ac4cbb5bd3)
 
-## 코드 설명
+## 코드 이미지 
 ![Image](https://github.com/user-attachments/assets/04935a72-5269-411e-b8c6-6569e8727123)
+
+## 코드 설명 
 **#!/usr/bin/bash는 이 스크립트를 Bash 셸에서 실행하도록 지정하는 쉐뱅(shebang)입니다.**
 이 스크립트는 GPIO 18, 23, 24, 25번 핀에 연결된 4개의 LED를 순차적으로 깜빡이게 만드는 도미노 LED 제어 스크립트입니다.
 
