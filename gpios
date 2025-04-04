@@ -1,0 +1,8 @@
+#! /usr/bin/bash
+for i in {2..27};
+	do printf "%2d" $((i%10));
+done
+
+echo
+echo -n " "
+pinctrl lev 2-27

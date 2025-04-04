@@ -1,0 +1,18 @@
+#!/usr/bin/bash
+
+# 사용할 핀 번호 배열
+pins=(18 23 24 25)
+
+# 각 핀을 출력으로 설정
+for pin in "${pins[@]}"; do
+    pinctrl set $pin op
+done
+
+# 무한 루프로 도미노처럼 깜빡이기
+while true; do
+    for pin in "${pins[@]}"; do
+        pinctrl set $pin dh
+        sleep 1
+        pinctrl set $pin dl
+    done
+done
