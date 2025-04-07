@@ -11,7 +11,7 @@
 ![Image](https://github.com/user-attachments/assets/4c58c5a8-48d8-41d3-b6e7-3a0027d59efb)
 
 ## 코드 이미지
-![Image](https://github.com/user-attachments/assets/ba3f2314-6f7c-496c-bc09-bde5b318b0c4)\
+![Image](https://github.com/user-attachments/assets/f4b70bb0-d69b-4e58-a280-5c06173e72a8)
 
 ## 사용 방법
 Raspberry Pi의 GPIO 18, 23, 24번 핀에 LED를 연결합니다.
