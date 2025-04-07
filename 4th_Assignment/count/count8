@@ -8,28 +8,26 @@ for pin in "${pins[@]}"; do
     pinctrl set $pin op
 done
 
+
+while true; do 
 # 무한 루프를 통해서 count8 실행
 # 0~7까지 반복
-for ((i=0; i<8; i++)); do
-    echo "Count: $i"
+    for ((i=0; i<8; i++)); do
+        echo "Count: $i"
 
-    # 이진수로 각 비트를 꺼내서 LED에 반영
-    for bit in {0..2}; do
-        pin=${pins[$bit]}
-        
-        
-        # 비트 추출: i에서(0,1,2)위치의 비트를 가져옴(쉬프트 연산은 led의 on/off만 결정)
-        if (( (i >> (2 - bit)) & 1 )); then
-            pinctrl set $pin dh # 이 부분을 통해서 몇번 led를 킬건지 결정
-        else
-            pinctrl set $pin dl
-        fi
+        # 이진수로 각 비트를 꺼내서 LED에 반영
+        for bit in {0..2}; do
+            pin=${pins[$bit]}
+            
+            
+            # 비트 추출: i에서(0,1,2)위치의 비트를 가져옴(쉬프트 연산은 led의 on/off만 결정)
+            if (( (i >> (2 - bit)) & 1 )); then
+                pinctrl set $pin dh # 이 부분을 통해서 몇번 led를 킬건지 결정
+            else
+                pinctrl set $pin dl
+            fi
+        done
+
+        sleep 1
     done
-
-    sleep 1
-done
-
-# 모두 OFF
-for pin in "${pins[@]}"; do
-    pinctrl set $pin dl
 done
