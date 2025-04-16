@@ -1,0 +1,19 @@
+#!/bin/bash
+
+
+pinctrl set 25 ip pu     # 버튼 핀을 입력 + Pull-Up 설정
+# 사용할 핀 번호 배열
+pins=(8 7 16 20)
+
+# 각 핀을 출력으로 설정
+for pin in "${pins[@]}"; do
+    pinctrl set $pin op
+    pinctrl set $pin dl # 초기 상태를 꺼짐으로 설정
+done
+
+# 도미노 출력
+for pin in "${pins[@]}"; do
+    pinctrl set $pin dh
+    sleep 1
+    pinctrl set $pin dl
+done

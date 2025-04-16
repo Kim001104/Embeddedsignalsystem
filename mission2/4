@@ -1,0 +1,39 @@
+#!/bin/bash
+
+# GPIO 설정
+button=25
+leds=(8 7 16 20)  # LSB → MSB
+
+# 초기 설정
+pinctrl set $button ip pu  # 버튼 입력 + Pull-Up
+
+# LED 핀을 출력으로 설정하고 초기화
+for pin in "${leds[@]}"; do
+    pinctrl set $pin op
+    pinctrl set $pin dl
+done
+
+count=0
+prev="hi"
+
+while true; do
+    state=$(pinctrl get $button | awk '{print $5}')
+
+    # 버튼이 눌리는 순간 (hi → lo) 감지
+    if [ "$prev" = "hi" ] && [ "$state" = "lo" ]; then
+        count=$(( (count + 1) % 16 ))  # 4-bit 카운터: 0~15 순환
+
+        # 4비트 출력
+        for i in {0..3}; do
+            bit=$(( (count >> i) & 1 ))
+            if [ "$bit" -eq 1 ]; then
+                pinctrl set ${leds[$i]} dh
+            else
+                pinctrl set ${leds[$i]} dl
+            fi
+        done
+    fi
+
+    prev="$state"
+    sleep 0.05
+done

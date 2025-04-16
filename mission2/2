@@ -1,0 +1,26 @@
+#!/bin/bash
+
+# 초기 설정
+pinctrl set 20 op        # LED 핀을 출력 모드로 설정
+pinctrl set 25 ip pu     # 버튼 핀을 입력 + Pull-Up 설정
+
+prev_state="hi"
+led_state=0
+
+while true; do
+    curr_state=$(pinctrl get 25 | awk '{print $5}')
+    
+    if [ "$prev_state" = "hi" ] && [ "$curr_state" = "lo" ]; then
+        # 버튼이 눌린 순간 (하강 에지 감지)
+        if [ "$led_state" -eq 0 ]; then
+            pinctrl set 20 dh
+            led_state=1
+        else
+            pinctrl set 20 dl
+            led_state=0
+        fi
+    fi
+
+    prev_state="$curr_state"
+    sleep 0.05
+done

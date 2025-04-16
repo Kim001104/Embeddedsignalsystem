@@ -1,0 +1,14 @@
+#!/bin/bash
+
+pinctrl set 20 op
+pinctrl set 25 ip pu
+
+while true; do
+    state=$(pinctrl get 25 | awk '{print $5}')
+    if [ "$state" = "lo" ]; then
+        pinctrl set 20 dh
+    else
+        pinctrl set 20 dl
+    fi
+    sleep 0.05
+done
