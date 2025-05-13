@@ -2,6 +2,7 @@
 
 ## 유투브 링크
 AT9과 R9DS 초기 바인딩 작업 및 AT9에서 사용자가 채널 변경과 채널 조작법 설명
+
 https://www.youtube.com/watch?v=i5hyyABaOV4
 
 ## ✅ 아두이노 UNO 핀 할당표 (PWM + 인터럽트 최적화)
