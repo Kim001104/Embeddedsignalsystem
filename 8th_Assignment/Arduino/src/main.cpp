@@ -2,9 +2,35 @@
 #include <PinChangeInterrupt.h>
 
 // 채널 핀 정의
-const byte chPins[3] = {2, 3, 4}; // 채널 1, 2, 3
-const byte ledPins[3] = {9, 10, 11};  // LED 핀
-const byte rgbPins[3] = {5, 6, 7};  // 삼색 LED 핀
+// 채널 1->D2: 밝기 조절
+// 채널 8->D3: LED ON/OFF
+// 채널 2->D4: 삼색 LED 색상 조절
+
+/*
+  수신기R9DS에서 각각 CH1,CH8,CH2을 아두이노에서 디지털 핀2,3,4를 사용 중이다.
+  R9DS 수신기는 기본 주파수50Hz(20ms)를 가지고 채널의 펄스폭은 최소 1000us(1ms)에서 최대 2000us(2ms)이며 기본 중립값은 1500us(1.5ms)이다.
+  본 프로젝트는 송신기(AT9)에서 조이스틱을 통해서 수신기로 보내는 펄스폭을 조절하고 수신기는 아두이노 디지털 입력으로 해당 값을 입력을 주어 3개의 LED와 삼색 LED를 조절함에 목표가 있다.
+  
+  각각 동작에 대해서 설명을 하자면
+
+  채널1번의 경우 LED의 밝기를 조절하는 경우이다. 송신기의 우측 조이스틱을 좌우로 조절하며 기본 중간값에 위치하면 1500us이고 왼쪽으로 최대 움직이면 1000us 오른쪽으로 최대 움직이면 2000us이다.
+  1000us일때는 LED의 밝기값이 최대가 되며 2000us일때는 밝기값이 최소가된다.
+
+  채널2번의 경우 LED를 on/off 동작하는 경우이다. 송신기의 우측 조이스틱을 상하로 조절하며 기본 중간값에 위치하면 위와 동일하게 1500us 위쪽으로 최대 움직이면 2000us 아래쪽으로 최대 움직이면 1000us
+  기본값은 1480~1500사이이기 때문에 led의 on/off 동작은 아래쪽으로 최대 내렸을 때 즉, 펄스 폭이 1000us일때 off가 되고 이외 조이스틱이 중간에 위치하거나 위쪽으로 최대 올리면 켜진다.
+
+  채널3번의 경우 삼색LED를 조절하는 경우이다.우선 삼색 LED의 경우 각각 빨,초,파의 색 변화가 있다.
+  송신기 좌측 조이스틱의 상하를 삼색 led 조절하는 것에 사용하고 있으며, 기본 값인 1500us의 펄스폭에서는 초록색,
+  최소 펄스폭인 1060의 펄스폭에서는 빨간색이고,
+  최대 펄스폭인 2000의 펄스폭에서는 파란색led가 켜진다.
+
+  이와 같이 본 프로젝트에서는 AT9 송신기에서 펄스폭을 변화시킴에 따라서 수신기 R9DS는 아두이노로 디지털입력의 펄스폭이 변화가 되고 해당 디지털 신호를 읽는 LED 디지털 핀들은
+  그에 해당하는 동작을 함을 볼 수가 있었다. 이를 통해서 추후 진행될 RC카 프로젝트에서 펄스폭의 변화를 컨트롤하여 앞뒤,좌우,정지와 같은 동작을 실행시키면 될 것 같다고 추측한다.
+*/
+
+const byte chPins[3] = {2, 3, 4}; // 채널 핀(하드웨어 인터럽트 핀 & 소프트에어 인터럽트 핀)
+const byte ledPins[3] = {5,6,9};  // LED 핀(PWM 핀)
+const byte rgbPins[3] = {10,11,12};  // 삼색 LED 핀(PWM 핀)
 
 // 펄스 측정용 변수
 volatile unsigned long startTimes[3] = {0, 0, 0}; // 시작 시간 초기화
@@ -66,9 +92,22 @@ void loop() {
   unsigned long pulse3 = pulseWidths[2]; 
 
   int brightness = constrain(map(pulse1, 1000, 2000, 0, 255), 0, 255);  // 0-255 범위로 변환
-  bool ledOn = pulse2 > 1400; // 채널 2의 펄스 폭에 따라 LED ON/OFF 결정(1400us 이상이면 ON)
+  bool ledOn = pulse2 > 1450; // 채널 2의 펄스 폭에 따라 LED ON/OFF 결정(1450us 이상이면 ON) => 안정성 유지
 
-  float hue = map(pulse3, 1050, 1850, 0, 180);  // 0-180 범위로 변환
+  /*
+
+  색 범위 
+  Hue (도)	색상
+  0	빨강 (Red)
+  60	노랑 (Yellow)
+  120	초록 (Green)
+  180	청록 (Cyan)
+  240	파랑 (Blue)
+  300	자홍 (Magenta)
+  360 빨강 (Red)
+
+  */
+  float hue = map(pulse3, 1000, 2000, 0, 360);  
   float r, g, b;
   hsvToRgb(hue, 1.0, 1.0, &r, &g, &b);  // HSV를 RGB로 변환
 
@@ -76,7 +115,7 @@ void loop() {
     analogWrite(ledPins[i], ledOn ? brightness : 0);  // LED 밝기 조절(삼색 LED와는 별개)
   }
 
-  analogWrite(rgbPins[0], ledOn ? int(r * 255) : 0);  // 삼색 LED 색상 조절
+  analogWrite(rgbPins[0], ledOn ? int(r * 255) : 0);  // 삼색 LED 색상 및 밝기 조절
   analogWrite(rgbPins[1], ledOn ? int(g * 255) : 0);
   analogWrite(rgbPins[2], ledOn ? int(b * 255) : 0);
 
