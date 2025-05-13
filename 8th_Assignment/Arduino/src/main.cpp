@@ -70,35 +70,25 @@ void loop() {
   unsigned long pulse3 = pulseWidths[2]; 
 
   int brightness = constrain(map(pulse1, 1000, 2000, 0, 255), 0, 255);  // 0-255 범위로 변환
-  bool ledOn = pulse2 > 1450; // 채널 2의 펄스 폭에 따라 LED ON/OFF 결정(1450us 이상이면 ON) => 안정성 유지
-
-  /*
-
-  색 범위 
-  Hue (도)	색상
-  0	빨강 (Red)
-  60	노랑 (Yellow)
-  120	초록 (Green)
-  180	청록 (Cyan)
-  240	파랑 (Blue)
-  300	자홍 (Magenta)
-  360 빨강 (Red)
-
-  */
+  
+  // 채널 2 LED ON/OFF 결정(1450us 이상이면 ON) => 안정성 유지
+  bool ledOn = pulse2 > 1450; 
 
   float hue = map(pulse3, 1000, 2000, 0, 360);  // 0-360 범위로 변환
   float r, g, b;
   hsvToRgb(hue, 1.0, 1.0, &r, &g, &b);  // HSV를 RGB로 변환
 
-  for (int i = 0; i < 3; i++) { 
-    analogWrite(ledPins[i], ledOn ? brightness : 0);  // LED 밝기 조절(삼색 LED와는 별개)
+  // 채널1 LED 밝기 조절
+  for (int i = 0; i < 3; i++) {   
+    analogWrite(ledPins[i], ledOn ? brightness : 0);  
   }
 
+  // 채널8 삼색 LED 색상 조절
   analogWrite(rgbPins[0], ledOn ? int(r * 255) : 0);  // 삼색 LED 색상 및 밝기 조절
   analogWrite(rgbPins[1], ledOn ? int(g * 255) : 0);
   analogWrite(rgbPins[2], ledOn ? int(b * 255) : 0);
 
-  Serial.print("CH1: "); Serial.print(pulse1);
+  Serial.print("CH1: "); Serial.print(pulse1);    //디버깅용 시리얼 출력
   Serial.print(" | CH8: "); Serial.print(pulse2);
   Serial.print(" | CH2: "); Serial.println(pulse3);
 
