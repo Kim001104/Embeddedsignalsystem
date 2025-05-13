@@ -1,7 +1,7 @@
 # RD9S를 이용한 아두이노 LED 컨트롤
 
 ## 유투브 링크
-AT9과 R9DS 초기 바인딩 작업 및 AT9에서 사용자가 채널 변경과 채널 조작법 설명
+AT9과 R9DS 초기 바인딩 작업,AT9에서 사용자가 채널 변경과 채널 조작법 및 각각의 동작 설명 동영상 
 
 https://www.youtube.com/watch?v=i5hyyABaOV4
 
