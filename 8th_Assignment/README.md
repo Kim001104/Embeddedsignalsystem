@@ -53,12 +53,14 @@ AT9 송신기에서 MODE에 들어가서 AUX/CH에서 사용자가 직접적으�
 R9DS의 채널과 LED, 삼색 LED의 핀들은 배열로 설정하여서 유지 보수 용이성을 살리고
 펄스 측정용 default 시간은 0으로 초기화 하고, pulse 폭의 default 값은 1500us로 설정하였다.
 
+### 인터럽트 핸들러 함수 정의 및 펄스폭 계산 코드
 ![Image](https://github.com/user-attachments/assets/36d48008-4136-4ec8-bb58-042c8e091502)
 ![Image](https://github.com/user-attachments/assets/1a4e295a-cf12-46a6-a543-cb8de6d32930)
 ![Image](https://github.com/user-attachments/assets/43ff1baa-6158-4fd8-aa68-f3029906e322)
 
 위 이미지와 같이 인터럽트 핸들러 함수를 설정하고 pinchangeinterrupt의 라이브러리를 사용하여 CHANGE 모드 즉, RISING과 FALLING에서 모두 인터럽트를 처리를 하여 펄스폭을 계산하고 펄스폭에 따른 적절한 동작을 할 수 있도록 하였다.
 
+### HSV->RGB로 변환하여 삼색 LED 제어하는 함수 코드
 ![Image](https://github.com/user-attachments/assets/7bd3f453-8d36-4df0-8778-af4c1b1e3f76)
 ![Image](https://github.com/user-attachments/assets/30a9a261-1687-415b-8d54-80c00f49f947)
 
